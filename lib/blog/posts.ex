@@ -22,6 +22,18 @@ defmodule Blog.Posts do
   end
 
   @doc """
+  Returns the list of posts that match the search term.
+  """
+  @spec list_posts(String.t()) :: [Post.t()]
+  def list_posts(term) do
+    search = "%#{term}%"
+
+    Post
+    |> where([p], ilike(p.title, ^search))
+    |> Repo.all()
+  end
+
+  @doc """
   Gets a single post.
 
   Raises `Ecto.NoResultsError` if the Post does not exist.
