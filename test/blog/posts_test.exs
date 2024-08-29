@@ -35,7 +35,12 @@ defmodule Blog.PostsTest do
 
     test "update_post/2 with valid data updates the post" do
       post = post_fixture()
-      update_attrs = %{content: "some updated content", subtitle: "some updated subtitle", title: "some updated title"}
+
+      update_attrs = %{
+        content: "some updated content",
+        subtitle: "some updated subtitle",
+        title: "some updated title"
+      }
 
       assert {:ok, %Post{} = post} = Posts.update_post(post, update_attrs)
       assert post.content == "some updated content"
@@ -58,6 +63,32 @@ defmodule Blog.PostsTest do
     test "change_post/1 returns a post changeset" do
       post = post_fixture()
       assert %Ecto.Changeset{} = Posts.change_post(post)
+    end
+
+    test "list_posts/1 filters posts by exact, partial and case-insensitive matching" do
+      post = post_fixture()
+
+      # exact match
+      assert Posts.list_posts("some title") == [post]
+      # exact match case-insensitive
+      assert Posts.list_posts("Some Title") == [post]
+
+      # partial match at the beginning
+      assert Posts.list_posts("some") == [post]
+      # partial match at the beginning case-insensitive
+      assert Posts.list_posts("sOMe") == [post]
+      # partial match at the end
+      assert Posts.list_posts("title") == [post]
+      # partial match at the end case-insensitive
+      assert Posts.list_posts("titlE") == [post]
+      # partial match in the middle
+      assert Posts.list_posts("tle") == [post]
+
+      # no match
+      assert Posts.list_posts("other") == []
+
+      # no filter
+      assert Posts.list_posts("") == [post]
     end
   end
 end
