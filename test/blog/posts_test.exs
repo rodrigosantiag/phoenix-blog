@@ -10,9 +10,26 @@ defmodule Blog.PostsTest do
 
     @invalid_attrs %{content: nil, subtitle: nil, title: nil}
 
-    test "list_posts/0 returns all posts" do
+    test "list_posts/0 returns all posts in correct order" do
       post = post_fixture()
-      assert Posts.list_posts() == [post]
+
+      old_post =
+        post_fixture(
+          title: "older post",
+          published_on: NaiveDateTime.add(NaiveDateTime.utc_now(), -1, :day)
+        )
+
+      assert Posts.list_posts() == [post, old_post]
+    end
+
+    test "list_posts/0 does not return invisible posts" do
+      post_fixture(visible: false)
+      assert Posts.list_posts() == []
+    end
+
+    test "list_posts/0 does not return posts scheduled for the future" do
+      post_fixture(published_on: NaiveDateTime.add(NaiveDateTime.utc_now(), 1, :day))
+      assert Posts.list_posts() == []
     end
 
     test "get_post!/1 returns the post with given id" do
@@ -21,12 +38,19 @@ defmodule Blog.PostsTest do
     end
 
     test "create_post/1 with valid data creates a post" do
-      valid_attrs = %{content: "some content", subtitle: "some subtitle", title: "some title"}
+      valid_attrs = %{
+        content: "some content",
+        subtitle: "some subtitle",
+        title: "some title",
+        published_on: NaiveDateTime.utc_now(),
+        visible: true
+      }
 
       assert {:ok, %Post{} = post} = Posts.create_post(valid_attrs)
       assert post.content == "some content"
-      assert post.subtitle == "some subtitle"
       assert post.title == "some title"
+      assert post.published_on == NaiveDateTime.utc_now() |> NaiveDateTime.to_date()
+      assert post.visible == true
     end
 
     test "create_post/1 with invalid data returns error changeset" do
@@ -38,14 +62,19 @@ defmodule Blog.PostsTest do
 
       update_attrs = %{
         content: "some updated content",
-        subtitle: "some updated subtitle",
-        title: "some updated title"
+        title: "some updated title",
+        published_on: NaiveDateTime.add(NaiveDateTime.utc_now(), -1, :day),
+        visible: false
       }
 
       assert {:ok, %Post{} = post} = Posts.update_post(post, update_attrs)
       assert post.content == "some updated content"
-      assert post.subtitle == "some updated subtitle"
       assert post.title == "some updated title"
+
+      assert post.published_on ==
+               NaiveDateTime.add(NaiveDateTime.utc_now(), -1, :day) |> NaiveDateTime.to_date()
+
+      assert post.visible == false
     end
 
     test "update_post/2 with invalid data returns error changeset" do
