@@ -2,13 +2,16 @@ defmodule BlogWeb.PostControllerTest do
   use BlogWeb.ConnCase
 
   import Blog.PostsFixtures
+  import Blog.CommentsFixtures
 
   @create_attrs %{content: "some content", subtitle: "some subtitle", title: "some title"}
+
   @update_attrs %{
     content: "some updated content",
     subtitle: "some updated subtitle",
     title: "some updated title"
   }
+
   @invalid_attrs %{content: nil, subtitle: nil, title: nil}
 
   describe "index" do
@@ -96,6 +99,17 @@ defmodule BlogWeb.PostControllerTest do
       assert_error_sent 404, fn ->
         get(conn, ~p"/posts/#{post}")
       end
+    end
+  end
+
+  describe "get post with comments" do
+    setup [:create_post]
+
+    test "shows post with comments", %{conn: conn, post: post} do
+      comment = comment_fixture(post_id: post.id)
+      conn = get(conn, ~p"/posts/#{post}")
+      assert html_response(conn, 200) =~ post.title
+      assert html_response(conn, 200) =~ comment.content
     end
   end
 
