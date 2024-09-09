@@ -12,7 +12,7 @@ defmodule Blog.PostsFixtures do
       attrs
       |> Enum.into(%{
         content: "some content",
-        title: "some title",
+        title: Faker.App.author(),
         published_on: NaiveDateTime.utc_now(),
         visible: true
       })

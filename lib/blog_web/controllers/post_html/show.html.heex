@@ -20,11 +20,23 @@
     <.list>
       <:item title="Content"><%= comment.content %></:item>
       <:item title="Created at"><%= comment.inserted_at %></:item>
+      <:item title="Actions">
+        <.link navigate={~p"/comments/#{comment.id}/edit"}>Edit</.link>
+        |
+        <.link
+          href={~p"/comments/#{comment.id}"}
+          data-confirm="Are you sure you want to delete this comment?"
+          method="delete"
+          rel="nofollow"
+        >
+          Delete
+        </.link>
+      </:item>
     </.list>
   <% end %>
 </.header>
 
-<.simple_form :let={f} for={@comment_changeset} action={~p"/posts"}>
+<.simple_form :let={f} for={@comment_changeset} action={~p"/comments"}>
   <.input field={f[:post_id]} type="hidden" value={@post.id} />
   <.input field={f[:content]} type="text" label="Content" />
   <:actions>
