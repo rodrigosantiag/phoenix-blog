@@ -4,14 +4,19 @@ defmodule Blog.CommentsFixtures do
   entities via the `Blog.Comments` context.
   """
 
+  import Blog.PostsFixtures
+
   @doc """
   Generate a comment.
   """
   def comment_fixture(attrs \\ %{}) do
+    post = post_fixture()
+
     {:ok, comment} =
       attrs
       |> Enum.into(%{
-        content: "some content"
+        content: "some content",
+        post_id: post.id
       })
       |> Blog.Comments.create_comment()
 

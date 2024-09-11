@@ -102,7 +102,7 @@ defmodule Blog.PostsTest do
     end
 
     test "list_posts/1 filters posts by exact, partial and case-insensitive matching" do
-      post = post_fixture()
+      post = post_fixture(title: "some title")
 
       # exact match
       assert Posts.list_posts("some title") == [post]

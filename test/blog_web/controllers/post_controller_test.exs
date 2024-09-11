@@ -21,13 +21,13 @@ defmodule BlogWeb.PostControllerTest do
     end
 
     test "searches for posts - exact match", %{conn: conn} do
-      post = post_fixture()
+      post = post_fixture(title: "some title")
       conn = get(conn, ~p"/posts", title: "some title")
       assert html_response(conn, 200) =~ post.title
     end
 
     test "searches for posts - partial match", %{conn: conn} do
-      post = post_fixture()
+      post = post_fixture(title: Faker.App.author() <> "tle")
       conn = get(conn, ~p"/posts", title: "tle")
       assert html_response(conn, 200) =~ post.title
     end
