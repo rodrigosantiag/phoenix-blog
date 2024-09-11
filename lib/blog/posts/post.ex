@@ -11,6 +11,7 @@ defmodule Blog.Posts.Post do
     field :title, :string
     field :published_on, :date
     field :visible, :boolean, default: true
+    has_many :comments, Blog.Comments.Comment
 
     timestamps(type: :utc_datetime)
   end
