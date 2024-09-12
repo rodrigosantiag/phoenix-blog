@@ -13,6 +13,8 @@ defmodule Blog.Accounts.User do
     field :current_password, :string, virtual: true, redact: true
     field :confirmed_at, :utc_datetime
     field :username, :string
+    has_many :posts, Blog.Posts.Post
+    has_many :comments, Blog.Comments.Comment
 
     timestamps(type: :utc_datetime)
   end
