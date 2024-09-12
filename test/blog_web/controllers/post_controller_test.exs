@@ -1,9 +1,11 @@
 defmodule BlogWeb.PostControllerTest do
   use BlogWeb.ConnCase
 
+  import Blog.AccountsFixtures
   import Blog.PostsFixtures
   import Blog.CommentsFixtures
-  import Blog.AccountsFixtures
+
+  alias Blog.Accounts
 
   @create_attrs %{content: "some content", subtitle: "some subtitle", title: "some title"}
 
@@ -16,6 +18,8 @@ defmodule BlogWeb.PostControllerTest do
   @invalid_attrs %{content: nil, subtitle: nil, title: nil}
 
   describe "index" do
+    setup :register_and_log_in_user
+
     test "lists all posts", %{conn: conn} do
       conn = get(conn, ~p"/posts")
       assert html_response(conn, 200) =~ "Listing Posts"
@@ -41,6 +45,8 @@ defmodule BlogWeb.PostControllerTest do
   end
 
   describe "new post" do
+    setup :register_and_log_in_user
+
     test "renders form", %{conn: conn} do
       conn = get(conn, ~p"/posts/new")
       assert html_response(conn, 200) =~ "New Post"
@@ -48,6 +54,8 @@ defmodule BlogWeb.PostControllerTest do
   end
 
   describe "create post" do
+    setup :register_and_log_in_user
+
     test "redirects to show when data is valid", %{conn: conn} do
       user = user_fixture()
       create_attrs = Map.put(@create_attrs, :user_id, user.id)
@@ -70,33 +78,50 @@ defmodule BlogWeb.PostControllerTest do
     setup [:create_post]
 
     test "renders form for editing chosen post", %{conn: conn, post: post} do
-      conn = get(conn, ~p"/posts/#{post}/edit")
+      user = Accounts.get_user!(post.user_id)
+      conn = conn |> log_in_user(user) |> get(~p"/posts/#{post}/edit")
       assert html_response(conn, 200) =~ "Edit Post"
+    end
+
+    test "a user cannot edit another user's post", %{conn: conn, post: post} do
+      another_user = user_fixture()
+      conn = conn |> log_in_user(another_user) |> get(~p"/posts/#{post}/edit")
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) == "You can only edit or delete your own posts."
     end
   end
 
   describe "update post" do
-    setup [:create_post]
+    setup do
+      post = post_fixture()
+      user = Accounts.get_user!(post.user_id)
 
-    test "redirects when data is valid", %{conn: conn, post: post} do
-      conn = put(conn, ~p"/posts/#{post}", post: @update_attrs)
+      %{post: post, user: user}
+    end
+
+    test "redirects when data is valid", %{conn: conn, post: post, user: user} do
+      conn = conn |> log_in_user(user) |> put(~p"/posts/#{post}", post: @update_attrs)
       assert redirected_to(conn) == ~p"/posts/#{post}"
 
       conn = get(conn, ~p"/posts/#{post}")
       assert html_response(conn, 200) =~ "some updated content"
     end
 
-    test "renders errors when data is invalid", %{conn: conn, post: post} do
-      conn = put(conn, ~p"/posts/#{post}", post: @invalid_attrs)
+    test "renders errors when data is invalid", %{conn: conn, post: post, user: user} do
+      conn = conn |> log_in_user(user) |> put(~p"/posts/#{post}", post: @invalid_attrs)
       assert html_response(conn, 200) =~ "Edit Post"
     end
   end
 
   describe "delete post" do
-    setup [:create_post]
+    setup do
+      post = post_fixture()
+      user = Accounts.get_user!(post.user_id)
 
-    test "deletes chosen post", %{conn: conn, post: post} do
-      conn = delete(conn, ~p"/posts/#{post}")
+      %{post: post, user: user}
+    end
+
+    test "deletes chosen post", %{conn: conn, post: post, user: user} do
+      conn = conn |> log_in_user(user) |> delete(~p"/posts/#{post}")
       assert redirected_to(conn) == ~p"/posts"
 
       assert_error_sent 404, fn ->
@@ -106,11 +131,16 @@ defmodule BlogWeb.PostControllerTest do
   end
 
   describe "get post with comments" do
-    setup [:create_post]
+    setup do
+      post = post_fixture()
+      user = Accounts.get_user!(post.user_id)
 
-    test "shows post with comments", %{conn: conn, post: post} do
+      %{post: post, user: user}
+    end
+
+    test "shows post with comments", %{conn: conn, post: post, user: user} do
       comment = comment_fixture(post_id: post.id)
-      conn = get(conn, ~p"/posts/#{post}")
+      conn = conn |> log_in_user(user) |> get(~p"/posts/#{post}")
       assert html_response(conn, 200) =~ post.title
       assert html_response(conn, 200) =~ comment.content
     end
