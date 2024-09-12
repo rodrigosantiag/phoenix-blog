@@ -4,17 +4,22 @@ defmodule Blog.PostsFixtures do
   entities via the `Blog.Posts` context.
   """
 
+  import Blog.AccountsFixtures
+
   @doc """
   Generate a post.
   """
   def post_fixture(attrs \\ %{}) do
+    user = user_fixture()
+
     {:ok, post} =
       attrs
       |> Enum.into(%{
         content: "some content",
         title: Faker.App.author(),
         published_on: NaiveDateTime.utc_now(),
-        visible: true
+        visible: true,
+        user_id: user.id
       })
       |> Blog.Posts.create_post()
 

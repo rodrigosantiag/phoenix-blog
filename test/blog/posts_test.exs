@@ -8,6 +8,7 @@ defmodule Blog.PostsTest do
 
     import Blog.PostsFixtures
     import Blog.CommentsFixtures
+    import Blog.AccountsFixtures
 
     @invalid_attrs %{content: nil, subtitle: nil, title: nil}
 
@@ -45,12 +46,15 @@ defmodule Blog.PostsTest do
     end
 
     test "create_post/1 with valid data creates a post" do
+      user = user_fixture()
+
       valid_attrs = %{
         content: "some content",
         subtitle: "some subtitle",
         title: "some title",
         published_on: NaiveDateTime.utc_now(),
-        visible: true
+        visible: true,
+        user_id: user.id
       }
 
       assert {:ok, %Post{} = post} = Posts.create_post(valid_attrs)
