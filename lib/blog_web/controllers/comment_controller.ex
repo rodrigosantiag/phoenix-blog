@@ -3,6 +3,8 @@ defmodule BlogWeb.CommentController do
 
   alias Blog.Comments
 
+  plug :require_user_owns_comment when action in [:edit, :update, :delete]
+
   def create(conn, %{"comment" => comment_params}) do
     case Comments.create_comment(comment_params) do
       {:ok, comment} ->
@@ -45,5 +47,19 @@ defmodule BlogWeb.CommentController do
     conn
     |> put_flash(:info, "Comment deleted successfully.")
     |> redirect(to: ~p"/posts/#{comment.post_id}")
+  end
+
+  defp require_user_owns_comment(conn, _params) do
+    comment_id = String.to_integer(conn.path_params["id"])
+    comment = Comments.get_comment!(comment_id)
+
+    if conn.assigns[:current_user].id != comment.user_id do
+      conn
+      |> put_flash(:error, "You can only edit or delete your own comments.")
+      |> redirect(to: "/posts/#{comment.post_id}")
+      |> halt()
+    else
+      conn
+    end
   end
 end

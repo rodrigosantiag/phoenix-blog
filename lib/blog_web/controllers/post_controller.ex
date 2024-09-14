@@ -51,7 +51,12 @@ defmodule BlogWeb.PostController do
     post = Posts.get_post!(id)
 
     comment_changeset = Comments.change_comment(%Comments.Comment{})
-    render(conn, :show, post: post, comment_changeset: comment_changeset, user_id: Map.get(conn.assigns[:current_user] || %{}, :id))
+
+    render(conn, :show,
+      post: post,
+      comment_changeset: comment_changeset,
+      user_id: Map.get(conn.assigns[:current_user] || %{}, :id)
+    )
   end
 
   def edit(conn, %{"id" => id}) do
@@ -92,7 +97,7 @@ defmodule BlogWeb.PostController do
     else
       conn
       |> put_flash(:error, "You can only edit or delete your own posts.")
-      |> redirect(to: ~p"/posts/#{post_id}")
+      |> redirect(to: ~p"/posts")
       |> halt()
     end
   end
