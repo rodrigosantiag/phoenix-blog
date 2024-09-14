@@ -1,6 +1,7 @@
 defmodule BlogWeb.PostController do
   use BlogWeb, :controller
 
+  alias Blog.Accounts
   alias Blog.Comments
   alias Blog.Posts
   alias Blog.Posts.Post
@@ -49,13 +50,15 @@ defmodule BlogWeb.PostController do
 
   def show(conn, %{"id" => id}) do
     post = Posts.get_post!(id)
+    user = Accounts.get_user!(post.user_id)
 
     comment_changeset = Comments.change_comment(%Comments.Comment{})
 
     render(conn, :show,
       post: post,
       comment_changeset: comment_changeset,
-      user_id: Map.get(conn.assigns[:current_user] || %{}, :id)
+      user_id: Map.get(conn.assigns[:current_user] || %{}, :id),
+      username: user.username
     )
   end
 

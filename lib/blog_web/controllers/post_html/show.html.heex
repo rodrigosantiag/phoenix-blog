@@ -1,5 +1,6 @@
 <.header>
   Post <%= @post.id %>
+  <p><small>Posted by: <%= @username %></small></p>
   <:actions>
     <.link href={~p"/posts/#{@post}/edit"}>
       <.button>Edit post</.button>
@@ -19,6 +20,7 @@
   <%= for comment <- @post.comments do %>
     <.list>
       <:item title="Content"><%= comment.content %></:item>
+      <:item title="Author"><%= comment.user.username %></:item>
       <:item title="Created at"><%= comment.inserted_at %></:item>
       <:item title="Actions">
         <.link navigate={~p"/comments/#{comment.id}/edit"}>Edit</.link>
