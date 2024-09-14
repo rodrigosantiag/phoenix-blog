@@ -38,6 +38,7 @@
 
 <.simple_form :let={f} for={@comment_changeset} action={~p"/comments"}>
   <.input field={f[:post_id]} type="hidden" value={@post.id} />
+  <.input field={f[:user_id]} type="hidden" value={@user_id} />
   <.input field={f[:content]} type="text" label="Content" />
   <:actions>
     <.button type="submit">Add comment</.button>

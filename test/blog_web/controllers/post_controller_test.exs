@@ -86,7 +86,9 @@ defmodule BlogWeb.PostControllerTest do
     test "a user cannot edit another user's post", %{conn: conn, post: post} do
       another_user = user_fixture()
       conn = conn |> log_in_user(another_user) |> get(~p"/posts/#{post}/edit")
-      assert Phoenix.Flash.get(conn.assigns.flash, :error) == "You can only edit or delete your own posts."
+
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) ==
+               "You can only edit or delete your own posts."
     end
   end
 
