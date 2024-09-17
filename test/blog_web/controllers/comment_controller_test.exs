@@ -2,11 +2,13 @@ defmodule BlogWeb.CommentControllerTest do
   @moduledoc """
   Tests for the CommentController.
   """
+  alias Blog.Accounts
 
   use BlogWeb.ConnCase
 
   import Blog.PostsFixtures
   import Blog.CommentsFixtures
+  import Blog.AccountsFixtures
 
   @create_attrs %{content: "some comment content"}
 
@@ -17,7 +19,7 @@ defmodule BlogWeb.CommentControllerTest do
   @invalid_attrs %{content: nil}
 
   describe "create comment" do
-    setup [:create_post]
+    setup [:register_and_log_in_user, :create_post]
 
     test "redirects to show when data is valid", %{conn: conn, post: post} do
       comment_attrs = Map.put(@create_attrs, :post_id, post.id)
@@ -38,53 +40,81 @@ defmodule BlogWeb.CommentControllerTest do
     end
   end
 
-  describe "edit post" do
-    setup [:create_comment]
+  describe "edit comment" do
+    setup do
+      comment = comment_fixture()
+      user = Accounts.get_user!(comment.user_id)
+      %{comment: comment, user: user}
+    end
 
-    test "renders form for editing chosen post", %{conn: conn, comment: comment} do
-      conn = get(conn, ~p"/comments/#{comment}/edit")
+    test "renders form for editing chosen post", %{conn: conn, comment: comment, user: user} do
+      conn = conn |> log_in_user(user) |> get(~p"/comments/#{comment}/edit")
       assert html_response(conn, 200) =~ "Edit Comment"
+    end
+
+    test "user cannot edit other user's comment", %{conn: conn, comment: comment} do
+      another_user = user_fixture()
+      conn = conn |> log_in_user(another_user) |> get(~p"/comments/#{comment}/edit")
+
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) ==
+               "You can only edit or delete your own comments."
     end
   end
 
-  describe "update post" do
-    setup [:create_post]
+  describe "update comment" do
+    setup do
+      comment = comment_fixture()
+      user = Accounts.get_user!(comment.user_id)
 
-    test "redirects when data is valid", %{conn: conn, post: post} do
-      conn = put(conn, ~p"/posts/#{post}", post: @update_attrs)
-      assert redirected_to(conn) == ~p"/posts/#{post}"
+      %{comment: comment, user: user}
+    end
 
-      conn = get(conn, ~p"/posts/#{post}")
+    test "redirects when data is valid", %{conn: conn, comment: comment, user: user} do
+      conn =
+        conn
+        |> log_in_user(user)
+        |> put(~p"/comments/#{comment}", comment: @update_attrs)
+
+      assert redirected_to(conn) == ~p"/posts/#{comment.post_id}"
+
+      conn = get(conn, ~p"/posts/#{comment.post_id}")
       assert html_response(conn, 200) =~ "comment updated"
     end
 
-    test "renders errors when data is invalid", %{conn: conn, post: post} do
-      conn = put(conn, ~p"/posts/#{post}", post: @invalid_attrs)
-      assert html_response(conn, 200) =~ "Edit Post"
+    test "renders errors when data is invalid", %{conn: conn, comment: comment, user: user} do
+      conn =
+        conn
+        |> log_in_user(user)
+        |> put(~p"/comments/#{comment}", comment: @invalid_attrs)
+
+      assert html_response(conn, 200) =~ "Edit Comment"
+    end
+
+    test "user cannot update other user's comment", %{conn: conn, comment: comment} do
+      another_user = user_fixture()
+
+      conn =
+        conn |> log_in_user(another_user) |> put(~p"/comments/#{comment}", comment: @update_attrs)
+
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) ==
+               "You can only edit or delete your own comments."
     end
   end
 
-  describe "delete post" do
-    setup [:create_post]
+  describe "delete comment" do
+    setup [:register_and_log_in_user, :create_comment]
 
-    test "deletes chosen post", %{conn: conn, post: post} do
-      conn = delete(conn, ~p"/posts/#{post}")
-      assert redirected_to(conn) == ~p"/posts"
-
-      assert_error_sent 404, fn ->
-        get(conn, ~p"/posts/#{post}")
-      end
+    test "deletes chosen comment", %{conn: conn, comment: comment} do
+      conn = delete(conn, ~p"/comments/#{comment}")
+      assert redirected_to(conn) == ~p"/posts/#{comment.post_id}"
     end
-  end
 
-  describe "get post with comments" do
-    setup [:create_post]
+    test "user cannot delete other user's comment", %{conn: conn, comment: comment} do
+      another_user = user_fixture()
+      conn = conn |> log_in_user(another_user) |> delete(~p"/comments/#{comment}")
 
-    test "shows post with comments", %{conn: conn, post: post} do
-      comment = comment_fixture(post_id: post.id)
-      conn = get(conn, ~p"/posts/#{post}")
-      assert html_response(conn, 200) =~ post.title
-      assert html_response(conn, 200) =~ comment.content
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) ==
+               "You can only edit or delete your own comments."
     end
   end
 

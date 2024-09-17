@@ -6,6 +6,7 @@
   <.input field={f[:content]} type="text" label="Content" />
   <.input field={f[:published_on]} type="date" label="Published on" />
   <.input field={f[:visible]} type="checkbox" label="Visible" />
+  <.input field={f[:user_id]} type="hidden" value={@current_user.id} />
   <:actions>
     <.button>Save Post</.button>
   </:actions>

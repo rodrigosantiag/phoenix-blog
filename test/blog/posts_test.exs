@@ -41,8 +41,8 @@ defmodule Blog.PostsTest do
 
     test "get_post!/1 returns the post with given id and associated comments" do
       post = post_fixture()
-      comment = comment_fixture(post_id: post.id)
-      assert Posts.get_post!(post.id).comments == [comment]
+      comment = comment_fixture(post_id: post.id, user_id: post.user_id)
+      assert Posts.get_post!(post.id).comments == [Repo.preload(comment, :user)]
     end
 
     test "create_post/1 with valid data creates a post" do

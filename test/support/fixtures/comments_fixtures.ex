@@ -5,21 +5,19 @@ defmodule Blog.CommentsFixtures do
   """
 
   import Blog.PostsFixtures
-  import Blog.AccountsFixtures
 
   @doc """
   Generate a comment.
   """
   def comment_fixture(attrs \\ %{}) do
     post = post_fixture()
-    user = user_fixture()
 
     {:ok, comment} =
       attrs
       |> Enum.into(%{
         content: "some content",
         post_id: post.id,
-        user_id: user.id
+        user_id: post.user_id
       })
       |> Blog.Comments.create_comment()
 
