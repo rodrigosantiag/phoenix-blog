@@ -6,6 +6,7 @@ defmodule Blog.CommentsTest do
   describe "comments" do
     alias Blog.Comments.Comment
 
+    import Blog.AccountsFixtures
     import Blog.CommentsFixtures
     import Blog.PostsFixtures
 
@@ -25,7 +26,8 @@ defmodule Blog.CommentsTest do
 
     test "create_comment/1 with valid data creates a comment" do
       post = post_fixture()
-      valid_attrs = %{content: "some content", post_id: post.id}
+      user = user_fixture()
+      valid_attrs = %{content: "some content", post_id: post.id, user_id: user.id}
 
       assert {:ok, %Comment{} = comment} = Comments.create_comment(valid_attrs)
       assert comment.content == "some content"

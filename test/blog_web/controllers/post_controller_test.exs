@@ -3,6 +3,7 @@ defmodule BlogWeb.PostControllerTest do
 
   import Blog.PostsFixtures
   import Blog.CommentsFixtures
+  import Blog.AccountsFixtures
 
   @create_attrs %{content: "some content", subtitle: "some subtitle", title: "some title"}
 
@@ -48,7 +49,9 @@ defmodule BlogWeb.PostControllerTest do
 
   describe "create post" do
     test "redirects to show when data is valid", %{conn: conn} do
-      conn = post(conn, ~p"/posts", post: @create_attrs)
+      user = user_fixture()
+      create_attrs = Map.put(@create_attrs, :user_id, user.id)
+      conn = post(conn, ~p"/posts", post: create_attrs)
 
       assert %{id: id} = redirected_params(conn)
       assert redirected_to(conn) == ~p"/posts/#{id}"
