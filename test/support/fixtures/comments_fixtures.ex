@@ -5,7 +5,6 @@ defmodule Blog.CommentsFixtures do
   """
 
   import Blog.PostsFixtures
-  import Blog.AccountsFixtures
 
   @doc """
   Generate a comment.

@@ -4,6 +4,7 @@ defmodule BlogWeb.PostControllerTest do
   import Blog.AccountsFixtures
   import Blog.PostsFixtures
   import Blog.CommentsFixtures
+  import Blog.AccountsFixtures
 
   alias Blog.Accounts
 
