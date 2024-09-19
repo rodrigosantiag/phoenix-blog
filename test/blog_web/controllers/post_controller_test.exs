@@ -5,8 +5,10 @@ defmodule BlogWeb.PostControllerTest do
   import Blog.PostsFixtures
   import Blog.CommentsFixtures
   import Blog.AccountsFixtures
+  import Blog.TagsFixtures
 
   alias Blog.Accounts
+  alias Blog.Posts
 
   @create_attrs %{content: "some content", subtitle: "some subtitle", title: "some title"}
 
@@ -72,6 +74,30 @@ defmodule BlogWeb.PostControllerTest do
     test "renders errors when data is invalid", %{conn: conn} do
       conn = post(conn, ~p"/posts", post: @invalid_attrs)
       assert html_response(conn, 200) =~ "New Post"
+    end
+
+    test "create post with tags", %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+
+      tag1 = tag_fixture(name: "tag 1 name")
+      tag2 = tag_fixture(name: "tag 2 name")
+
+      create_attrs = %{
+        content: "some content",
+        title: "some title",
+        visible: true,
+        published_on: DateTime.utc_now(),
+        user_id: user.id,
+        tag_ids: [tag1.id, tag2.id]
+      }
+
+      conn = post(conn, ~p"/posts", post: create_attrs)
+
+      assert %{id: id} = redirected_params(conn)
+      assert redirected_to(conn) == ~p"/posts/#{id}"
+
+      assert Posts.get_post!(id).tags == [tag1, tag2]
     end
   end
 
