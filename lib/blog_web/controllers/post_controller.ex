@@ -19,6 +19,7 @@ defmodule BlogWeb.PostController do
     render(conn, :index, posts: posts)
   end
 
+  @spec new(Plug.Conn.t(), any()) :: Plug.Conn.t()
   def new(conn, _params) do
     changeset = Posts.change_post(%Post{})
     render(conn, :new, changeset: changeset, tag_options: tag_options())

@@ -9,10 +9,6 @@
   <.input field={f[:user_id]} type="hidden" value={@current_user.id} />
   <.input field={f[:tag_ids]} type="select" label="Tags" multiple={true} options={@tag_options} />
 
-  <.inputs_for :let={f_nested} field={f[:tags]}>
-    <.input type="text" field={f_nested[:name]} />
-  </.inputs_for>
-
   <:actions>
     <.button>Save Post</.button>
   </:actions>
