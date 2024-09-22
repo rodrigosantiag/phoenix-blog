@@ -33,10 +33,13 @@ defmodule Blog.Posts do
     search = "%#{term}%"
 
     Post
+    |> join(:left, [p], t in assoc(p, :tags))
     |> where([p], ilike(p.title, ^search))
     |> where([p], p.visible == true)
     |> where([p], p.published_on <= ^NaiveDateTime.utc_now())
+    |> or_where([p, t], ilike(t.name, ^search))
     |> order_by([p], desc: p.published_on)
+    |> distinct([p], p.id)
     |> Repo.all()
   end
 

@@ -125,7 +125,13 @@ defmodule Blog.PostsTest do
     end
 
     test "list_posts/1 filters posts by exact, partial and case-insensitive matching" do
+      tag = tag_fixture(name: "tag1")
       post = post_fixture(title: "some title")
+
+      Ecto.Changeset.change(post)
+      |> Ecto.Changeset.put_assoc(:tags, [tag])
+      |> Repo.update!()
+
       post_id = post.id
 
       # exact match
@@ -143,6 +149,22 @@ defmodule Blog.PostsTest do
       assert [%{id: ^post_id}] = Posts.list_posts("titlE")
       # partial match in the middle
       assert [%{id: ^post_id}] = Posts.list_posts("tle")
+
+      # exact match on tag
+      assert [%{id: ^post_id}] = Posts.list_posts("tag1")
+      # exact match case-insensitive on tag
+      assert [%{id: ^post_id}] = Posts.list_posts("Tag1")
+
+      # partial match at the beginning of tag
+      assert [%{id: ^post_id}] = Posts.list_posts("some")
+      # partial match case-insensitive at the beginning of tag
+      assert [%{id: ^post_id}] = Posts.list_posts("sOMe")
+      # partial match at the end of tag
+      assert [%{id: ^post_id}] = Posts.list_posts("tag")
+      # partial match case-insensitive at the end of tag
+      assert [%{id: ^post_id}] = Posts.list_posts("taG")
+      # partial match in the middle of tag
+      assert [%{id: ^post_id}] = Posts.list_posts("ag")
 
       # no match
       assert [] = Posts.list_posts("other")

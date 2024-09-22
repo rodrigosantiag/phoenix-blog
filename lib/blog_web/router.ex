@@ -28,6 +28,7 @@ defmodule BlogWeb.Router do
     pipe_through [:browser]
     get "/", PostController, :index
     resources "/posts", PostController, only: [:index, :show]
+    resources "/tags", TagController
   end
 
   # Other scopes may use custom stacks.
