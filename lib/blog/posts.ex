@@ -33,10 +33,13 @@ defmodule Blog.Posts do
     search = "%#{term}%"
 
     Post
+    |> join(:left, [p], t in assoc(p, :tags))
     |> where([p], ilike(p.title, ^search))
     |> where([p], p.visible == true)
     |> where([p], p.published_on <= ^NaiveDateTime.utc_now())
+    |> or_where([p, t], ilike(t.name, ^search))
     |> order_by([p], desc: p.published_on)
+    |> distinct([p], p.id)
     |> Repo.all()
   end
 
@@ -54,7 +57,7 @@ defmodule Blog.Posts do
       ** (Ecto.NoResultsError)
 
   """
-  def get_post!(id), do: Repo.get!(Post, id) |> Repo.preload(comments: [:user])
+  def get_post!(id), do: Repo.get!(Post, id) |> Repo.preload([:tags, comments: [:user]])
 
   @doc """
   Creates a post.
@@ -68,9 +71,9 @@ defmodule Blog.Posts do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_post(attrs \\ %{}) do
+  def create_post(attrs \\ %{}, tags \\ []) do
     %Post{}
-    |> Post.changeset(attrs)
+    |> Post.changeset(attrs, tags)
     |> Repo.insert()
   end
 
@@ -86,9 +89,9 @@ defmodule Blog.Posts do
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_post(%Post{} = post, attrs) do
+  def update_post(%Post{} = post, attrs, tags \\ []) do
     post
-    |> Post.changeset(attrs)
+    |> Post.changeset(attrs, tags)
     |> Repo.update()
   end
 
