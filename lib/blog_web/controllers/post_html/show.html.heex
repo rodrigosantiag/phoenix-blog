@@ -1,4 +1,7 @@
 <.header>
+  <%= if @post.cover_image do %>
+    <img src={@post.cover_image.url} alt="Cover image for post" />
+  <% end %>
   Post <%= @post.id %>
   <p><small>Posted by: <%= @username %></small></p>
   <:actions>

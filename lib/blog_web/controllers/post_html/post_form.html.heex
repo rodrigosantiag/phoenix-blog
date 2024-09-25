@@ -4,6 +4,9 @@
   </.error>
   <.input field={f[:title]} type="text" label="Title" />
   <.input field={f[:content]} type="text" label="Content" />
+  <.inputs_for :let={cover_image} field={f[:cover_image]}>
+    <.input field={cover_image[:url]} type="text" label="Cover Image URL" />
+  </.inputs_for>
   <.input field={f[:published_on]} type="date" label="Published on" />
   <.input field={f[:visible]} type="checkbox" label="Visible" />
   <.input field={f[:user_id]} type="hidden" value={@current_user.id} />

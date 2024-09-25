@@ -11,6 +11,7 @@ defmodule Blog.PostsFixtures do
   """
   def post_fixture(attrs \\ %{}) do
     user = user_fixture()
+    tags = attrs[:tags] || []
 
     {:ok, post} =
       attrs
@@ -21,7 +22,7 @@ defmodule Blog.PostsFixtures do
         visible: true,
         user_id: user.id
       })
-      |> Blog.Posts.create_post()
+      |> Blog.Posts.create_post(tags)
 
     post
   end
