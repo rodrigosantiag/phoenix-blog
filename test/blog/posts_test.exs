@@ -1,4 +1,5 @@
 defmodule Blog.PostsTest do
+  alias Blog.Posts.CoverImage
   use Blog.DataCase
 
   alias Blog.Posts
@@ -37,7 +38,7 @@ defmodule Blog.PostsTest do
 
     test "get_post!/1 returns the post with given id" do
       post = post_fixture()
-      assert Posts.get_post!(post.id) == Repo.preload(post, :comments)
+      assert Posts.get_post!(post.id) == Repo.preload(post, [:comments, :cover_image])
     end
 
     test "get_post!/1 returns the post with given id and associated comments" do
@@ -87,6 +88,22 @@ defmodule Blog.PostsTest do
       assert Repo.preload(tag2, posts: [:tags]).posts == [post1]
     end
 
+    test "create_post/1 with cover image" do
+      valid_attrs = %{
+        content: "some content",
+        title: "some title",
+        cover_image: %{url: "http://example.com/image.jpg"},
+        visible: true,
+        published_on: DateTime.utc_now(),
+        user_id: user_fixture().id
+      }
+
+      assert {:ok, %Post{} = post} = Posts.create_post(valid_attrs)
+
+      assert %CoverImage{url: "http://example.com/image.jpg"} =
+               Repo.preload(post, :cover_image).cover_image
+    end
+
     test "update_post/2 with valid data updates the post" do
       post = post_fixture()
 
@@ -110,13 +127,38 @@ defmodule Blog.PostsTest do
     test "update_post/2 with invalid data returns error changeset" do
       post = post_fixture()
       assert {:error, %Ecto.Changeset{}} = Posts.update_post(post, @invalid_attrs)
-      assert Repo.preload(post, :comments) == Posts.get_post!(post.id)
+      assert Repo.preload(post, [:comments, :cover_image]) == Posts.get_post!(post.id)
+    end
+
+    test "update_post/2 add an image" do
+      post = post_fixture()
+
+      assert {:ok, %Post{} = post} =
+               Posts.update_post(post, %{cover_image: %{url: "http://example.com/image2.jpg"}})
+
+      assert post.cover_image.url == "http://example.com/image2.jpg"
+    end
+
+    test "update_post/2 update existing image" do
+      post = post_fixture(cover_image: %{url: "http://example.com/image.jpg"})
+
+      assert {:ok, %Post{} = post} =
+               Posts.update_post(post, %{cover_image: %{url: "http://example.com/image2.jpg"}})
+
+      assert post.cover_image.url == "http://example.com/image2.jpg"
     end
 
     test "delete_post/1 deletes the post" do
       post = post_fixture()
       assert {:ok, %Post{}} = Posts.delete_post(post)
       assert_raise Ecto.NoResultsError, fn -> Posts.get_post!(post.id) end
+    end
+
+    test "delete_post/1 deletes the post and cover image" do
+      post = post_fixture(cover_image: %{url: "http://example.com/image.jpg"})
+      assert {:ok, %Post{}} = Posts.delete_post(post)
+      assert_raise Ecto.NoResultsError, fn -> Posts.get_post!(post.id) end
+      assert_raise Ecto.NoResultsError, fn -> Repo.get!(CoverImage, post.cover_image.id) end
     end
 
     test "change_post/1 returns a post changeset" do
