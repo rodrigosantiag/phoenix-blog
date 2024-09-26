@@ -35,6 +35,9 @@ jobs:
 
             - name: Check warnings
               run: mix compile --warnings-as-errors
+
+            - name: Run credo
+              run: mix credo
                 
             - name: run tests
               run: mix test
