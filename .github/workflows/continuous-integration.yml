@@ -27,6 +27,11 @@ jobs:
                 otp-version: "25.2"
                 elixir-version: "1.14.2"
 
+            - name: Formatting and warnings CI check
+              run: | 
+                mix format --check-formatted
+                mix compile --warnings-as-errors
+
             - name: Install dependencies
               run: mix deps.get
                 
