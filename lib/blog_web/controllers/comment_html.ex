@@ -13,6 +13,7 @@ defmodule BlogWeb.CommentHTML do
   """
   attr :changeset, Ecto.Changeset, required: true
   attr :action, :string, required: true
+  attr :current_user, Blog.Accounts.User, required: false
 
   def comment_form(assigns)
 end
