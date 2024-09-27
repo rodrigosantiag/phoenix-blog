@@ -105,6 +105,7 @@ if config_env() == :prod do
   config :blog, Blog.Mailer,
     adapter: Swoosh.Adapters.SendGrid,
     api_key: System.get_env("SENDGRID_API_KEY")
+
   #
   #     config :blog, Blog.Mailer,
   #       adapter: Swoosh.Adapters.Mailgun,
