@@ -28,7 +28,7 @@ defmodule Blog.Posts do
   @doc """
   Returns the list of posts that match the search term.
   """
-  @spec list_posts(String.t()) :: [Post.t()]
+  @spec list_posts(String.t()) :: [Post]
   def list_posts(term) do
     search = "%#{term}%"
 
