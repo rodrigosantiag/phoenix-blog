@@ -107,16 +107,19 @@ if config_env() == :prod do
   #   api_key: System.get_env("SENDGRID_API_KEY")
 
   #
-  config :blog, Blog.Mailer,
-    adapter: Swoosh.Adapters.Mailgun,
-    api_key: System.get_env("MAILGUN_API_KEY"),
-    domain: System.get_env("MAILGUN_DOMAIN")
+  # config :blog, Blog.Mailer,
+  #   adapter: Swoosh.Adapters.Mailgun,
+  #   api_key: System.get_env("MAILGUN_API_KEY"),
+  #   domain: System.get_env("MAILGUN_DOMAIN")
 
   #
   # For this example you need include a HTTP client required by Swoosh API client.
   # Swoosh supports Hackney and Finch out of the box:
   #
-  config :swoosh, api_client: Swoosh.ApiClient.Finch, finch_name: Blog.Finch
+  # config :swoosh, api_client: Swoosh.ApiClient.Finch, finch_name: Blog.Finch
   #
   # See https://hexdocs.pm/swoosh/Swoosh.html#module-installation for details.
+
+  config :blog, Blog.Mailer, adapter: Swoosh.Adapters.Local
+  config :swoosh, :api_client, false
 end
